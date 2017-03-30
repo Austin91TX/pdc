@@ -33,7 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Interop.Plantronics, Version=3.9.51669.48634, Culture=neutral, PublicKeyToken=a8048bce41894b6e, processorArchitecture=MSIL">
+    <Reference Include="Interop.Plantronics, Version=3.10.51713.770, Culture=neutral, PublicKeyToken=a8048bce41894b6e, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
       <HintPath>..\..\..\..\..\Program Files (x86)\Plantronics\Spokes3G SDK\Interop.Plantronics.dll</HintPath>

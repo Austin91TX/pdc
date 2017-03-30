@@ -1,39 +1,36 @@
 // PLTSDKConnectDemo.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
-#include "PLTSDKConnectDemo.h"
+#include <afxcmn.h>
+#include <iostream>
+using namespace std;
+
+// Spokes 3.0 COM SDK is distributed as tlb file.
+// C++ user can use #import directive that will create all proper C++ types, wrappers and interfaces for communicating with running Spokes3G.exe COM server
+#import "Plantronics.tlb" no_namespace, named_guids, raw_interfaces_only
 
 // We need this as project is created as Win console app, and we are instantiating ATL COM objects that are used as Event sink's
 CComModule _Module;
 extern __declspec(selectany) CAtlModule* _pAtlModule = &_Module;
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#endif
-
-
 // The one and only application object
-
 CWinApp theApp;
-
-using namespace std;
 
 int main()
 {
-    int nRetCode = 0;
+	int nRetCode = 0;
 
-    HMODULE hModule = ::GetModuleHandle(nullptr);
+	HMODULE hModule = ::GetModuleHandle(nullptr);
 
-    if (hModule != nullptr)
-    {
-        // initialize MFC and print and error on failure
-        if (!AfxWinInit(hModule, nullptr, ::GetCommandLine(), 0))
-        {
-            // TODO: change error code to suit your needs
-            wprintf(L"Fatal Error: MFC initialization failed\n");
-            nRetCode = 1;
-        }
+	if (hModule != nullptr)
+	{
+		// initialize MFC and print and error on failure
+		if (!AfxWinInit(hModule, nullptr, ::GetCommandLine(), 0))
+		{
+			// TODO: change error code to suit your needs
+			wprintf(L"Fatal Error: MFC initialization failed\n");
+			nRetCode = 1;
+		}
 		else
 		{
 			// TODO: code your application's behavior here.
@@ -54,13 +51,13 @@ int main()
 			// uninitialize COM
 			::CoUninitialize();
 		}
-    }
-    else
-    {
-        // TODO: change error code to suit your needs
-        wprintf(L"Fatal Error: GetModuleHandle failed\n");
-        nRetCode = 1;
-    }
+	}
+	else
+	{
+		// TODO: change error code to suit your needs
+		wprintf(L"Fatal Error: GetModuleHandle failed\n");
+		nRetCode = 1;
+	}
 
-    return nRetCode;
+	return nRetCode;
 }

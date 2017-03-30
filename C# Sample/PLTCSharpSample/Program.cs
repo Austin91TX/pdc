@@ -60,10 +60,10 @@ namespace PLTCSharpSample
                         DoResumeCall(_callid); // resume the call
                         break;
                     case "6":
-                        DoMuteCall(true); // mute the headset (note for wireless products, audio link must be active)
+                        DoMuteCall(true); // mute the headset (note for legacy wireless products, audio link must be active)
                         break;
                     case "7":
-                        DoMuteCall(false); // unmute the headset (note for wireless products, audio link must be active)
+                        DoMuteCall(false); // unmute the headset (note for legacy wireless products, audio link must be active)
                         break;
                     case "8":
                         DoTerminateCall(_callid); // inform Plantronics my app has now terminated the call
