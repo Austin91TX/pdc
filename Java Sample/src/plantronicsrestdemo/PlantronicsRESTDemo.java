@@ -3,7 +3,6 @@ package plantronicsrestdemo;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
@@ -14,10 +13,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author lcollins
- */
+// Pre-requisite, install Plantronics Hub from: http://www.plantronics.com/software
 public class PlantronicsRESTDemo {
 
     static Boolean quit = false;
@@ -27,16 +23,17 @@ public class PlantronicsRESTDemo {
     private static EventsListenerThread eventslistener = null;
     
     private static String BaseURL = "http://127.0.0.1:32017/";
-    //private static String BaseURL = "https://127.0.0.1:32018/";
     
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         System.out.println("Java Plantronics REST API Sample");
-        
-        DoAttachDevice();
-        DoShowDeviceInfo();
+               
+        DoAttachDevice(); // Connect to the Plantronics REST API
+        DoShowDeviceInfo(); // get info about attached device (if any)
+         
+        // start polling the API for device/call events or to reconnect to API (in the event of connection failure)...
         DoStartEventsListener(sessionid);
         
         while (!quit)
@@ -45,29 +42,29 @@ public class PlantronicsRESTDemo {
             String cmd = ReadCommand();          
             switch (cmd)
             {
-                case "1": 
-                    DoIncomingCall(++callid, "Bob%20Smith");            
+                case "1":
+                    DoIncomingCall(++callid, "Bob%20Smith"); // inform Plantronics my app has an incoming (ringing) call
                     break;
                 case "2":
-                    DoOutgoingCall(++callid, "Bob%20Smith");
+                    DoOutgoingCall(++callid, "Bob%20Smith"); // inform Plantronics my app has an outgoing call
                     break;
                 case "3":
-                    DoAnswerCall(callid);
+                    DoAnswerCall(callid); // inform Plantronics my app has now answered an incoming (ringing) call
                     break;
                 case "4":
-                    DoHoldCall(callid);
-                    break;
+                    DoHoldCall(callid); // place call on hold
+                    break; 
                 case "5":
-                    DoResumeCall(callid);
+                    DoResumeCall(callid); // resume the call
                     break;
                 case "6":
-                    DoMute(true);
+                    DoMute(true); // mute the headset (note for legacy wireless products, audio link must be active)
                     break;
                 case "7":
-                    DoMute(false);
+                    DoMute(false); // unmute the headset (note for legacy wireless products, audio link must be active)
                     break;
                  case "8":
-                    DoTerminateCall(callid);
+                    DoTerminateCall(callid); // inform Plantronics my app has now terminated the call
                     break;
                  case "0":
                     quit = true;
@@ -78,9 +75,8 @@ public class PlantronicsRESTDemo {
             }
         }
         
-        // Cleanup the Plantronics REST API
-        DoStopEventsListener();
-        DoReleaseDevice();
+        DoStopEventsListener(); // stop events polling
+        DoReleaseDevice(); // Cleanup the Plantronics REST API
     }
 
     private static void ShowMenu() {
@@ -112,12 +108,15 @@ public class PlantronicsRESTDemo {
     }
 
     public static void DoShowDeviceInfo() {
+        // get info about attached device (if any)
         RESTConvenienceClass.SendRESTCommand(
             BaseURL + "Spokes/DeviceServices/Info"
         );
     }
 
+    // Connect to the Plantronics REST API
     public static void DoAttachDevice() {
+        // Connect to the Plantronics REST API (attach device session)
         String tmpResult = 
             RESTConvenienceClass.SendRESTCommand(
                 BaseURL + "Spokes/DeviceServices/Attach?uid=0123456789"
@@ -144,6 +143,7 @@ public class PlantronicsRESTDemo {
                                         
             if (sessionid.length()>0)
             {
+                // Register Spokes plugin (Plantronics API application session)
                 RESTConvenienceClass.SendRESTCommand(
                     BaseURL + "Spokes/SessionManager/Register?name=My%20Java%20Plugin"
                 );               
@@ -156,7 +156,9 @@ public class PlantronicsRESTDemo {
         }
     }
 
+    // Cleanup the Plantronics REST API
     public static void DoReleaseDevice() {
+        // Unregister Spokes plugin (Plantronics API application session)
         RESTConvenienceClass.SendRESTCommand(
             BaseURL + "Spokes/SessionManager/UnRegister?name=My%20Java%20Plugin"
         );                
@@ -173,6 +175,7 @@ public class PlantronicsRESTDemo {
             
         if (sessionid.length()>0)
         {
+            // Disconnect from the Plantronics REST API (release device session)
             RESTConvenienceClass.SendRESTCommand(
                 BaseURL + "Spokes/DeviceServices/Release?sess="
                     + sessionid
@@ -184,6 +187,7 @@ public class PlantronicsRESTDemo {
     private static void DoIncomingCall(int callid, String caller_name) {
         if (sessionid.length()>0 && pluginRegistered)
         {
+            // inform Plantronics my app has an incoming (ringing) call
             RESTConvenienceClass.SendRESTCommand(
                 BaseURL + "Spokes/CallServices/IncomingCall?name=My%20Java%20Plugin&callID=%7B%22Id%22%3A%22"
                     + callid 
@@ -194,13 +198,14 @@ public class PlantronicsRESTDemo {
         }
         else
         {
-            System.out.println("Error: You need to Attach first (command 2), and register plugin (command 3)");
+            System.out.println("Error: You need to Attach device first");
         }
     }
     
     private static void DoOutgoingCall(int callid, String caller_name) {
         if (sessionid.length()>0 && pluginRegistered)
         {
+            // inform Plantronics my app has an outgoing call
             RESTConvenienceClass.SendRESTCommand(
                 BaseURL + "Spokes/CallServices/OutgoingCall?name=My%20Java%20Plugin&callID=%7B%22Id%22%3A%22"
                     + callid 
@@ -211,13 +216,14 @@ public class PlantronicsRESTDemo {
         }
         else
         {
-            System.out.println("Error: You need to Attach first (command 2), and register plugin (command 3)");
+            System.out.println("Error: You need to Attach device first");
         }
     }
 
         private static void DoTerminateCall(int callid) {
         if (sessionid.length()>0 && pluginRegistered)
         {
+            // inform Plantronics my app has now terminated the call
             RESTConvenienceClass.SendRESTCommand(
                 BaseURL + "Spokes/CallServices/TerminateCall?name=My%20Java%20Plugin&callID=%7B%22Id%22%3A%22"
                     + callid 
@@ -226,13 +232,14 @@ public class PlantronicsRESTDemo {
         }
         else
         {
-            System.out.println("Error: You need to Attach first (command 2), and register plugin (command 3)");
+            System.out.println("Error: You need to Attach device first");
         }
     }
 
     private static void DoAnswerCall(int callid) {
         if (sessionid.length()>0 && pluginRegistered)
         {
+            // inform Plantronics my app has now answered an incoming (ringing) call
             RESTConvenienceClass.SendRESTCommand(
                 BaseURL + "Spokes/CallServices/AnswerCall?name=My%20Java%20Plugin&callID=%7B%22Id%22%3A%22"
                     + callid 
@@ -241,13 +248,14 @@ public class PlantronicsRESTDemo {
         }
         else
         {
-            System.out.println("Error: You need to Attach first (command 2), and register plugin (command 3)");
+            System.out.println("Error: You need to Attach device");
         }
     }
 
     private static void DoHoldCall(int callid) {
         if (sessionid.length()>0 && pluginRegistered)
         {
+            // place call on hold
             RESTConvenienceClass.SendRESTCommand(
                 BaseURL + "Spokes/CallServices/HoldCall?name=My%20Java%20Plugin&callID=%7B%22Id%22%3A%22"
                     + callid 
@@ -256,13 +264,14 @@ public class PlantronicsRESTDemo {
         }
         else
         {
-            System.out.println("Error: You need to Attach first (command 2), and register plugin (command 3)");
+            System.out.println("Error: You need to Attach device");
         }
     }
 
     private static void DoResumeCall(int callid) {
         if (sessionid.length()>0 && pluginRegistered)
         {
+            // resume the call
             RESTConvenienceClass.SendRESTCommand(
                 BaseURL + "Spokes/CallServices/ResumeCall?name=My%20Java%20Plugin&callID=%7B%22Id%22%3A%22"
                     + callid 
@@ -271,13 +280,14 @@ public class PlantronicsRESTDemo {
         }
         else
         {
-            System.out.println("Error: You need to Attach first (command 2), and register plugin (command 3)");
+            System.out.println("Error: You need to Attach device");
         }
     }
 
     private static void DoMute(boolean muted) {
         if (sessionid.length()>0 && pluginRegistered)
         {
+            // mute/un-mute the headset (note for legacy wireless products, audio link must be active)
             RESTConvenienceClass.SendRESTCommand(
                 BaseURL + "Spokes/CallServices/MuteCall?name=My%20Java%20Plugin&muted="
                     + muted 
@@ -285,7 +295,7 @@ public class PlantronicsRESTDemo {
         }
         else
         {
-            System.out.println("Error: You need to Attach first (command 2), and register plugin (command 3)");
+            System.out.println("Error: You need to Attach device first");
         }
     }    
 
@@ -308,13 +318,14 @@ public class PlantronicsRESTDemo {
     private static void DoGetCallManagerState() {
         if (sessionid.length()>0 && pluginRegistered)
         {
+            // query current Plantronics API call manager state
             RESTConvenienceClass.SendRESTCommand(
                 BaseURL + "Spokes/CallServices/CallManagerState"
            );
         }
         else
         {
-            System.out.println("Error: You need to Attach first (command 2), and register plugin (command 3)");
+            System.out.println("Error: You need to Attach device first");
         }
     }
 }
