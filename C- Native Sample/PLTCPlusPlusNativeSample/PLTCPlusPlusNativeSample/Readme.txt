@@ -10,7 +10,7 @@ to control calls using command line.
 
 BUILDING the SpokesNativeSample
 
-1) Build the sample using VS 2013. The Project files are only for VS2013. 
+1) Build the sample using VS 2015. The Project files are only for VS2015. 
 2) The sample looks for import library Spokes.lib/dll in the SDK installation directory.
 
 
