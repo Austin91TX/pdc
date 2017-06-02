@@ -1,4 +1,4 @@
-// PLTCPlusPlusSample.cpp : Defines the entry point for the console application.
+// PLTCPlusPlusSample.cpp : C++ COM sample demonstrating basic call control.
 //
 
 #include <stdio.h>

@@ -1,5 +1,5 @@
-﻿// NOTE:
-// add a reference to: C:\Program Files (x86)\Plantronics\Spokes3G SDK\Interop.Plantronics.dll
+﻿// Program.cs : C# sample demonstrating basic call control.
+// NOTE: add a reference to: C:\Program Files (x86)\Plantronics\Spokes3G SDK\Interop.Plantronics.dll
 using System;
 using System.Runtime.InteropServices;
 using Interop.Plantronics;
