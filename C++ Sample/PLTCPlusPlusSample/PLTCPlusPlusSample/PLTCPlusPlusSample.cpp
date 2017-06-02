@@ -1,5 +1,7 @@
 // PLTCPlusPlusSample.cpp : C++ COM sample demonstrating basic call control.
-//
+// NOTE: Spokes 3.0 COM SDK is distributed as tlb file. 
+// C++ user can use #import directive (see below) that will create all proper C++ types, wrappers and interfaces for 
+// communicating with running PLTHub.exe COM server
 
 #include <stdio.h>
 #include <tchar.h>
@@ -17,8 +19,6 @@
 #include "atlcom.h"
 #include <SDKDDKVer.h>
 
-// Spokes 3.0 COM SDK is distributed as tlb file. 
-// C++ user can use #import directive that will create all proper C++ types, wrappers and interfaces for communicating with running PLTHub.exe COM server
 #import "Plantronics.tlb" no_namespace, named_guids, raw_interfaces_only
 
 #ifdef _MSC_VER
