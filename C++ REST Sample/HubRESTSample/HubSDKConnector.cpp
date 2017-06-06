@@ -1,6 +1,6 @@
 #include "HubSDKConnector.h"
 
-// HubSDKConnector is a class that implements the ISpokesProxy event callbacks used
+// HubSDKConnector is a class that implements the IHubRESTLib event callbacks used
 // to receive events from the Plantronics REST API (Plantronics headset events and call events)
 
 

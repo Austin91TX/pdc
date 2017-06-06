@@ -1,6 +1,6 @@
 #pragma once
 
-// HubSDKConnector is a class that implements the ISpokesProxy event callbacks used
+// HubSDKConnector is a class that implements the IHubRESTLib event callbacks used
 // to receive events from the Plantronics REST API (Plantronics headset events and call events)
 
 #include "HubRESTLib.h"
@@ -11,7 +11,7 @@ public:
 	HubSDKConnector();
 	~HubSDKConnector();
 
-	// Inherited via ISpokesProxy - event callbacks to receive events from the Plantronics REST API
+	// Inherited via IHubRESTLib - event callbacks to receive events from the Plantronics REST API
 	virtual void HubRESTLib_SDKError(HubSDKErrorType ErrorType, string ErrorTypeStr, string msg) override;
 	virtual void HubRESTLib_SDKInfo(HubSDKInfoType InfoType, string InfoTypeStr, string msg) override;
 	virtual void HubRESTLib_CallStateChanged(int callid, HubSDKCallState callstate, string callstatestr) override;

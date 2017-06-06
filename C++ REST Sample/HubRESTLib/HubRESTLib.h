@@ -199,7 +199,7 @@ private:
 	void DoResumeCall(int callid);
 	void DoMuteCall(bool muted);
 	string sessionid = "";
-	string pluginid = "Spokes%20Proxy%20Demo"; // hard-coded Hub sdk session name, note: needs url encoding
+	string pluginid = "Hub%20REST%20Sample"; // hard-coded Hub sdk session name, note: needs url encoding
 		// e.g. spaces are %20, etc.
 	bool pluginRegistered = false;
 	int callid = 0;

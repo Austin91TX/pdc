@@ -56,7 +56,7 @@ int GetCommand()
 
 int main()
 {
-	cout << "C++ Plantronics Hub Proxy Demo" <<  endl;
+	cout << "C++ Plantronics Hub REST Sample" <<  endl;
 	bool quit = false;
 	int callid = 0; 
 
