@@ -1,4 +1,4 @@
-// SpokesProxyDemo.cpp : This is a Sample C++ integration to Plantronics Hub REST Service API
+// HubRESTSample.cpp : This is a Sample C++ integration to Plantronics Hub REST Service API
 // illustrating how to add Plantronics call control features to a Native C++ application
 // http://developer.plantronics.com
 //
