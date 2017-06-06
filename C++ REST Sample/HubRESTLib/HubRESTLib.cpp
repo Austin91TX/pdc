@@ -1,4 +1,4 @@
-// SpokesProxy is a class that implements the Plantronics REST API integration in C++
+// HubRESTLib is a class that implements the Plantronics REST API integration in C++
 // allowing Native C++ programs to connect to Plantronics Hub via REST API requests
 
 #include "Poco/Net/HTTPClientSession.h"
@@ -12,7 +12,7 @@
 #include "Poco/Exception.h"
 #include "Poco/JSON/Parser.h"
 #include "Poco/JSON/Object.h"
-#include "SpokesProxy.h"
+#include "HubRESTLib.h"
 
 using Poco::Net::HTTPClientSession;
 using Poco::Net::HTTPRequest;
@@ -341,15 +341,15 @@ char * getTextForHubSDKHeadsetStateChange(int enumVal)
 	}
 }
 
-SpokesProxy::SpokesProxy(ISpokesProxy* eventListener)
+HubRESTLib::HubRESTLib(IHubRESTLib* eventListener)
 {
 	this->eventListener = eventListener;
 
 	// start worker thread to handle Hub API interaction
-	hubSDKThread = new thread(&SpokesProxy::HubSDKThreadFunction, this);
+	hubSDKThread = new thread(&HubRESTLib::HubSDKThreadFunction, this);
 }
 
-SpokesProxy::~SpokesProxy()
+HubRESTLib::~HubRESTLib()
 {
 	HubSDKAction action(HubSDKActionType_Shutdown);
 	DoHubSDKAction(action); // Cleanup the Plantronics REST API
@@ -357,7 +357,7 @@ SpokesProxy::~SpokesProxy()
 	delete hubSDKThread;
 }
 
-string SpokesProxy::GetJSONValue(string json)
+string HubRESTLib::GetJSONValue(string json)
 {
 	string result = "";
 	if (json.length() > 0)
@@ -383,7 +383,7 @@ string SpokesProxy::GetJSONValue(string json)
 			{
 				string msg("error extracting GetJSONValue: ");
 				msg.append(e.what());
-				eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_notification,
+				eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_notification,
 					getTextForHubSDKInfoType(HubSDKInfoType_notification), msg);
 			}
 		}
@@ -391,7 +391,7 @@ string SpokesProxy::GetJSONValue(string json)
 	return result;
 }
 
-void SpokesProxy::ParseDeviceEvents(string json)
+void HubRESTLib::ParseDeviceEvents(string json)
 {
 	string result = "";
 	if (json.length() > 0)
@@ -410,7 +410,7 @@ void SpokesProxy::ParseDeviceEvents(string json)
 					int eventId = da[i]["Event_Id"];
 					if (eventListener != NULL)
 					{
-						eventListener->SpokesProxy_HeadsetStateChanged(
+						eventListener->HubRESTLib_HeadsetStateChanged(
 							(HubSDKHeadsetStateChange)eventId, getTextForHubSDKHeadsetStateChange(eventId));
 					}
 				}
@@ -422,14 +422,14 @@ void SpokesProxy::ParseDeviceEvents(string json)
 			{
 				string msg("error extracting ParseDeviceEvents: ");
 				msg.append(e.what());
-				eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_notification,
+				eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_notification,
 					getTextForHubSDKInfoType(HubSDKInfoType_notification), msg);
 			}
 		}
 	}
 }
 
-void SpokesProxy::ParseCallEvents(string json)
+void HubRESTLib::ParseCallEvents(string json)
 {
 	string result = "";
 	if (json.length() > 0)
@@ -449,7 +449,7 @@ void SpokesProxy::ParseCallEvents(string json)
 					int callId = da[i]["CallId"]["Id"];
 					if (eventListener != NULL)
 					{
-						eventListener->SpokesProxy_CallStateChanged(
+						eventListener->HubRESTLib_CallStateChanged(
 							callId,	(HubSDKCallState)callState, getTextForHubSDKCallState(callState));
 					}
 				}
@@ -463,7 +463,7 @@ void SpokesProxy::ParseCallEvents(string json)
 				{
 					string msg("error extracting ParseCallEvents: ");
 					msg.append(e.what());
-					eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_notification,
+					eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_notification,
 						getTextForHubSDKInfoType(HubSDKInfoType_notification), msg);
 				}
 			}
@@ -471,7 +471,7 @@ void SpokesProxy::ParseCallEvents(string json)
 	}
 }
 
-void SpokesProxy::ParseDeviceInfo(string json)
+void HubRESTLib::ParseDeviceInfo(string json)
 {
 	string result = "";
 	if (json.length() > 0)
@@ -489,7 +489,7 @@ void SpokesProxy::ParseDeviceInfo(string json)
 				{
 					string msg("Device Attached: Product Name = ");
 					msg.append(test2.convert<string>());
-					eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_device_attached,
+					eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_device_attached,
 						getTextForHubSDKInfoType(HubSDKInfoType_notification), msg);
 				}
 			}
@@ -502,7 +502,7 @@ void SpokesProxy::ParseDeviceInfo(string json)
 				{
 					string msg("error extracting ParseDeviceInfo: ");
 					msg.append(e.what());
-					eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_notification,
+					eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_notification,
 						getTextForHubSDKInfoType(HubSDKInfoType_notification), msg);
 				}
 			}
@@ -510,7 +510,7 @@ void SpokesProxy::ParseDeviceInfo(string json)
 	}
 }
 
-string SpokesProxy::GetJSONSubValue(string json, string keyname, string valuename)
+string HubRESTLib::GetJSONSubValue(string json, string keyname, string valuename)
 {
 	string result = "";
 	if (json.length() > 0)
@@ -536,7 +536,7 @@ string SpokesProxy::GetJSONSubValue(string json, string keyname, string valuenam
 			{
 				string msg("error extracting GetJSONSubValue: ");
 				msg.append(e.what());
-				eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_notification,
+				eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_notification,
 					getTextForHubSDKInfoType(HubSDKInfoType_notification), msg);
 			}
 		}
@@ -544,7 +544,7 @@ string SpokesProxy::GetJSONSubValue(string json, string keyname, string valuenam
 	return result;
 }
 
-void SpokesProxy::DoAttachDevice()
+void HubRESTLib::DoAttachDevice()
 {
 	// Connect to the Plantronics REST API (attach device session)
 	string tmpResult = SendRESTCommand("/Spokes/DeviceServices/Attach?uid=0123456789");
@@ -557,7 +557,7 @@ void SpokesProxy::DoAttachDevice()
 			{
 				string notice("Hub SDK connection successful, session id = ");
 				notice.append(sessionid);
-				eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_notification,
+				eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_notification,
 					getTextForHubSDKInfoType(HubSDKInfoType_notification), notice);
 			}
 			Thread::sleep(250);
@@ -567,12 +567,12 @@ void SpokesProxy::DoAttachDevice()
 			SendRESTCommand(url);
 			pluginRegistered = true;
 			if (eventListener != NULL)
-				eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_connected, getTextForHubSDKInfoType(HubSDKInfoType_connected), "SDK now connected");
+				eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_connected, getTextForHubSDKInfoType(HubSDKInfoType_connected), "SDK now connected");
 		}
 		else
 		{
 			if (eventListener != NULL)
-				eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_nodevice,
+				eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_nodevice,
 					getTextForHubSDKInfoType(HubSDKInfoType_nodevice),
 					"There are no supported devices. Please attach a Plantronics headset to the PC.");
 		}
@@ -581,10 +581,10 @@ void SpokesProxy::DoAttachDevice()
 	{
 		if (eventListener != NULL)
 		{
-			eventListener->SpokesProxy_SDKError(HubSDKErrorType_connection_failed,
+			eventListener->HubRESTLib_SDKError(HubSDKErrorType_connection_failed,
 				getTextForHubSDKErrorType(HubSDKErrorType_connection_failed),
 				"Error connecting to Plantronics Hub. (Have you installed and run Plantronics Hub from http://www.plantronics.com/software");
-			eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_disconnected,
+			eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_disconnected,
 				getTextForHubSDKInfoType(HubSDKInfoType_disconnected),
 				"SDK not connected.");
 		}
@@ -592,7 +592,7 @@ void SpokesProxy::DoAttachDevice()
 }
 
 // Cleanup the Plantronics REST API
-void SpokesProxy::DoReleaseDevice() 
+void HubRESTLib::DoReleaseDevice() 
 {
 	// Unregister Spokes plugin (Plantronics API application session)
 	string url("/Spokes/SessionManager/UnRegister?name=");
@@ -610,7 +610,7 @@ void SpokesProxy::DoReleaseDevice()
 	}
 }
 
-void SpokesProxy::DoShowDeviceInfo()
+void HubRESTLib::DoShowDeviceInfo()
 {
 	// get info about attached device (if any)
 	string url("/Spokes/DeviceServices/Info");
@@ -618,7 +618,7 @@ void SpokesProxy::DoShowDeviceInfo()
 	ParseDeviceInfo(deviceInfo);
 }
 
-void SpokesProxy::DoHubSDKAction(HubSDKAction action)
+void HubRESTLib::DoHubSDKAction(HubSDKAction action)
 {
 	if (pluginRegistered || action.ActionType == HubSDKActionType_ConnectToAPI
 		|| action.ActionType == HubSDKActionType_Shutdown)
@@ -636,13 +636,13 @@ void SpokesProxy::DoHubSDKAction(HubSDKAction action)
 			string msg("Cannot perform SDK action: ");
 			msg.append(getTextForHubSDKActionType(action.ActionType));
 			msg.append(", SDK is not connected (is Plantronics Hub running?)");
-			eventListener->SpokesProxy_SDKError(
+			eventListener->HubRESTLib_SDKError(
 				HubSDKErrorType_not_connected, getTextForHubSDKErrorType(HubSDKErrorType_not_connected), msg);
 		}
 	}
 }
 
-void SpokesProxy::DoGetDeviceEvents()
+void HubRESTLib::DoGetDeviceEvents()
 {
 	string url = "/Spokes/DeviceServices/Events?sess=";
 	url.append(sessionid);
@@ -657,7 +657,7 @@ void SpokesProxy::DoGetDeviceEvents()
 		{
 			if (eventListener != NULL)
 			{
-				eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_device_detached,
+				eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_device_detached,
 					getTextForHubSDKInfoType(HubSDKInfoType_device_detached), "Device detached.");
 			}
 			// device has been unplugged
@@ -676,7 +676,7 @@ void SpokesProxy::DoGetDeviceEvents()
 	}
 }
 
-void SpokesProxy::DoGetCallEvents()
+void HubRESTLib::DoGetCallEvents()
 {
 	string url = "/Spokes/CallServices/CallEvents?name=";
 	url.append(pluginid);
@@ -685,7 +685,7 @@ void SpokesProxy::DoGetCallEvents()
 	ParseCallEvents(callEvents);
 }
 
-void SpokesProxy::HubSDKThreadFunction()
+void HubRESTLib::HubSDKThreadFunction()
 {
 	HubSDKAction action(HubSDKActionType_ConnectToAPI);
 	DoHubSDKAction(action);
@@ -746,7 +746,7 @@ void SpokesProxy::HubSDKThreadFunction()
 			break;
 		default:
 			if (eventListener != NULL)
-				eventListener->SpokesProxy_SDKError(HubSDKErrorType_invalid_action_requested,
+				eventListener->HubRESTLib_SDKError(HubSDKErrorType_invalid_action_requested,
 					getTextForHubSDKErrorType(HubSDKErrorType_invalid_action_requested), "The action requested is not implemented: " + nextAction.ActionType);
 			break;
 		}
@@ -777,7 +777,7 @@ void SpokesProxy::HubSDKThreadFunction()
 					// retry the SDK connection!
 					if (eventListener != NULL)
 					{
-						eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_notification,
+						eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_notification,
 							getTextForHubSDKInfoType(HubSDKInfoType_notification),
 							"-- POLLING FOR HUB / DEVICE RE-ATTACH --");
 					}
@@ -790,7 +790,7 @@ void SpokesProxy::HubSDKThreadFunction()
 	}
 }
 
-string SpokesProxy::SendRESTCommand(string path)
+string HubRESTLib::SendRESTCommand(string path)
 {
 	string responsestr = "";
 	try
@@ -810,14 +810,14 @@ string SpokesProxy::SendRESTCommand(string path)
 		msg.append(e.what());
 		if (eventListener != NULL)
 		{
-			eventListener->SpokesProxy_SDKError(HubSDKErrorType_connection_failed,
+			eventListener->HubRESTLib_SDKError(HubSDKErrorType_connection_failed,
 				getTextForHubSDKErrorType(HubSDKErrorType_connection_failed), msg);
 		}
 	}
 	return responsestr;
 }
 
-void SpokesProxy::DoIncomingCall(int callid, string contactname)
+void HubRESTLib::DoIncomingCall(int callid, string contactname)
 {
 	if (sessionid.length()>0 && pluginRegistered)
 	{
@@ -836,13 +836,13 @@ void SpokesProxy::DoIncomingCall(int callid, string contactname)
 	{
 		if (eventListener != NULL)
 		{
-			eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_nodevice,
+			eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_nodevice,
 				getTextForHubSDKInfoType(HubSDKInfoType_nodevice), "Error: You need to Attach device first");
 		}
 	}
 }
 
-void SpokesProxy::DoOutgoingCall(int callid, string contactname)
+void HubRESTLib::DoOutgoingCall(int callid, string contactname)
 {
 	if (sessionid.length()>0 && pluginRegistered)
 	{
@@ -861,13 +861,13 @@ void SpokesProxy::DoOutgoingCall(int callid, string contactname)
 	{
 		if (eventListener != NULL)
 		{
-			eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_nodevice,
+			eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_nodevice,
 				getTextForHubSDKInfoType(HubSDKInfoType_nodevice), "Error: You need to Attach device first");
 		}
 	}
 }
 
-void SpokesProxy::DoTerminateCall(int callid)
+void HubRESTLib::DoTerminateCall(int callid)
 {
 	if (sessionid.length()>0 && pluginRegistered)
 	{
@@ -884,13 +884,13 @@ void SpokesProxy::DoTerminateCall(int callid)
 	{
 		if (eventListener != NULL)
 		{
-			eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_nodevice,
+			eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_nodevice,
 				getTextForHubSDKInfoType(HubSDKInfoType_nodevice), "Error: You need to Attach device first");
 		}
 	}
 }
 
-void SpokesProxy::DoAnswerCall(int callid)
+void HubRESTLib::DoAnswerCall(int callid)
 {
 	if (sessionid.length()>0 && pluginRegistered)
 	{
@@ -907,13 +907,13 @@ void SpokesProxy::DoAnswerCall(int callid)
 	{
 		if (eventListener != NULL)
 		{
-			eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_nodevice,
+			eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_nodevice,
 				getTextForHubSDKInfoType(HubSDKInfoType_nodevice), "Error: You need to Attach device first");
 		}
 	}
 }
 
-void SpokesProxy::DoHoldCall(int callid)
+void HubRESTLib::DoHoldCall(int callid)
 {
 	if (sessionid.length()>0 && pluginRegistered)
 	{
@@ -930,13 +930,13 @@ void SpokesProxy::DoHoldCall(int callid)
 	{
 		if (eventListener != NULL)
 		{
-			eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_nodevice,
+			eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_nodevice,
 				getTextForHubSDKInfoType(HubSDKInfoType_nodevice), "Error: You need to Attach device first");
 		}
 	}
 }
 
-void SpokesProxy::DoResumeCall(int callid)
+void HubRESTLib::DoResumeCall(int callid)
 {
 	if (sessionid.length()>0 && pluginRegistered)
 	{
@@ -953,13 +953,13 @@ void SpokesProxy::DoResumeCall(int callid)
 	{
 		if (eventListener != NULL)
 		{
-			eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_nodevice,
+			eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_nodevice,
 				getTextForHubSDKInfoType(HubSDKInfoType_nodevice), "Error: You need to Attach device first");
 		}
 	}
 }
 
-void SpokesProxy::DoMuteCall(bool muted)
+void HubRESTLib::DoMuteCall(bool muted)
 {
 	if (sessionid.length()>0 && pluginRegistered)
 	{
@@ -974,7 +974,7 @@ void SpokesProxy::DoMuteCall(bool muted)
 	{
 		if (eventListener != NULL)
 		{
-			eventListener->SpokesProxy_SDKInfo(HubSDKInfoType_nodevice,
+			eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_nodevice,
 				getTextForHubSDKInfoType(HubSDKInfoType_nodevice), "Error: You need to Attach device first");
 		}
 	}

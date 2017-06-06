@@ -26,10 +26,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SpokesProxyDemo.cpp">
+    <ClCompile Include="HubSDKConnector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HubSDKConnector.cpp">
+    <ClCompile Include="HubRESTSample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,6 +1,6 @@
 #pragma once
 
-// SpokesProxy is a class that implements the Plantronics REST API integration in C++
+// HubRestLib is a class that implements the Plantronics REST API integration in C++
 // allowing Native C++ programs to connect to Plantronics Hub via REST API requests
 
 #include <iostream>
@@ -163,20 +163,20 @@ public:
 	}
 };
 
-class ISpokesProxy
+class IHubRESTLib
 {
 public:
-	virtual void SpokesProxy_SDKError(HubSDKErrorType ErrorType, string ErrorTypeStr, string msg) = 0;
-	virtual void SpokesProxy_SDKInfo(HubSDKInfoType InfoType, string InfoTypeStr, string msg) = 0;
-	virtual void SpokesProxy_CallStateChanged(int callid, HubSDKCallState callstate, string callstatestr) = 0;
-	virtual void SpokesProxy_HeadsetStateChanged(HubSDKHeadsetStateChange headsetstate, string headsetstatestr) = 0;
+	virtual void HubRESTLib_SDKError(HubSDKErrorType ErrorType, string ErrorTypeStr, string msg) = 0;
+	virtual void HubRESTLib_SDKInfo(HubSDKInfoType InfoType, string InfoTypeStr, string msg) = 0;
+	virtual void HubRESTLib_CallStateChanged(int callid, HubSDKCallState callstate, string callstatestr) = 0;
+	virtual void HubRESTLib_HeadsetStateChanged(HubSDKHeadsetStateChange headsetstate, string headsetstatestr) = 0;
 };
 
-class SpokesProxy
+class HubRESTLib
 {
 public:
-	SpokesProxy(ISpokesProxy* eventListener);
-	~SpokesProxy();
+	HubRESTLib(IHubRESTLib* eventListener);
+	~HubRESTLib();
 	void DoHubSDKAction(HubSDKAction action);
 private:
 	string SendRESTCommand(string path);
@@ -210,6 +210,6 @@ private:
 	string host = "127.0.0.1";
 	int port = 32017;
 	bool quit = false;
-	ISpokesProxy* eventListener = NULL;
+	IHubRESTLib* eventListener = NULL;
 	int eventPollCounter = 0;
 };
