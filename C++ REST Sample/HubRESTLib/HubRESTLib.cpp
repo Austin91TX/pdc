@@ -114,6 +114,12 @@ char * getTextForHubSDKErrorType(int enumVal)
 	case HubSDKErrorType::HubSDKErrorType_not_connected:
 		return "HubSDKErrorType_not_connected";
 		break;
+	case HubSDKErrorType::HubSDKErrorType_url_path_not_found:
+		return "HubSDKErrorType_url_path_not_found";
+		break;
+	case HubSDKErrorType::HubSDKErrorType_rest_api_error:
+		return "HubSDKErrorType_rest_api_error";
+		break;
 
 	default:
 		return "Not recognized..";
@@ -510,6 +516,53 @@ void HubRESTLib::ParseDeviceInfo(string json)
 	}
 }
 
+string HubRESTLib::ParseErrorIfPresent(string json)
+{
+	string result = "";
+	if (json.length() > 0)
+	{
+		try
+		{
+			Parser parser;
+			Var resultobj = parser.parse(json);
+			Object::Ptr object = resultobj.extract<Object::Ptr>();
+			Object::Ptr test = object->getObject("Err");
+			if (!test.isNull())
+			{
+				Var description = test->get("Description");
+				Var error_code = test->get("Error_Code"); 
+				Var type = test->get("Type");
+				// got an internal error response from Plantronics REST API
+				if (eventListener != NULL)
+				{
+					string msg("Internal REST API error: Description: ");
+					msg.append(description.convert<string>());
+					msg.append(", Error_Code: ");
+					msg.append(error_code.convert<string>());
+					msg.append(", Type: ");
+					msg.append(type.convert<string>());
+					eventListener->HubRESTLib_SDKError(HubSDKErrorType_rest_api_error,
+						getTextForHubSDKErrorType(HubSDKErrorType_rest_api_error), msg);
+				}
+			}
+		}
+		catch (exception const & e)
+		{
+			if (eventListener != NULL)
+			{
+				if (eventListener != NULL)
+				{
+					string msg("error extracting ParseErrorIfPresent: ");
+					msg.append(e.what());
+					eventListener->HubRESTLib_SDKInfo(HubSDKInfoType_notification,
+						getTextForHubSDKInfoType(HubSDKInfoType_notification), msg);
+				}
+			}
+		}
+	}
+	return result;
+}
+
 string HubRESTLib::GetJSONSubValue(string json, string keyname, string valuename)
 {
 	string result = "";
@@ -803,6 +856,29 @@ string HubRESTLib::SendRESTCommand(string path)
 		std::ostringstream oss;
 		StreamCopier::copyStream(rs, oss);
 		responsestr = oss.str();
+
+		// add exception handling here to surface any issues with the HTTP request
+		if (responsestr.compare("Not found.")==0)
+		{
+			// invalid URL path
+			if (eventListener != NULL)
+			{
+				string msg("URL requested was Not found: http://");
+				msg.append(host);
+				msg.append(":");
+				msg.append(std::to_string(port));
+				msg.append("/");
+				msg.append(path);
+				msg.append(", response = ");
+				msg.append(responsestr);
+				eventListener->HubRESTLib_SDKError(HubSDKErrorType_url_path_not_found,
+					getTextForHubSDKErrorType(HubSDKErrorType_url_path_not_found), msg);
+			}
+		}
+		else
+		{
+			ParseErrorIfPresent(responsestr);
+		}
 	}
 	catch (exception const & e)
 	{

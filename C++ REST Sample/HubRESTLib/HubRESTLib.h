@@ -30,7 +30,9 @@ enum HubSDKErrorType
 {
 	HubSDKErrorType_connection_failed,
 	HubSDKErrorType_invalid_action_requested,
-	HubSDKErrorType_not_connected
+	HubSDKErrorType_not_connected,
+	HubSDKErrorType_url_path_not_found,
+	HubSDKErrorType_rest_api_error
 };
 
 enum HubSDKInfoType
@@ -185,6 +187,7 @@ private:
 	void DoShowDeviceInfo();
 	string GetJSONValue(string json);
 	string GetJSONSubValue(string json, string keyname, string valuename);
+	string ParseErrorIfPresent(string json);
 	void ParseDeviceEvents(string json);
 	void ParseCallEvents(string json);
 	void ParseDeviceInfo(string json);
