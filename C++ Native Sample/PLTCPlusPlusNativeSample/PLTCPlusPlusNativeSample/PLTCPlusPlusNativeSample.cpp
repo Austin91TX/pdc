@@ -321,8 +321,8 @@ int _tmain(int argc, _TCHAR* argv[])
 			if (SM_RESULT_SUCCESS == session->getCallCommand(&callCommand))
 			{
 				// sink to all call events
-				unique_ptr<CallEventSink> callEvents(new CallEventSink(session)); //auto callEvents = std::make_unique<CallEventSink>(session);
-				unique_ptr<SessionManagerEventSink> sessionManagerEvents(new SessionManagerEventSink(sessionManager)); //auto sessionManagerEvents = std::make_unique<SessionManagerEventSink>(sessionManager);
+				auto callEvents = std::make_unique<CallEventSink>(session);
+				auto sessionManagerEvents = std::make_unique<SessionManagerEventSink>(sessionManager); 
 					
 				// enter in command loop
 				while (!quit)
