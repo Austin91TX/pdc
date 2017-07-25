@@ -24,11 +24,8 @@
 
 using namespace std;
 
-// global variables
-ISession* session = nullptr;
-IDevice* activeDevice = nullptr;
 bool gGotDevice = false;
-
+	
 std::string EnumToString(eCallState val)
 {
 	std::string str;
@@ -87,49 +84,7 @@ std::string EnumToString(eDeviceState val)
 	}
 	return str;
 }
-
-std::string EnumToString(eHeadsetStateChange val)
-{
-	std::string ret;
-	switch (val)
-	{
-	case HS_STATE_CHANGE_UNKNOWN: ret = "HS_STATE_CHANGE_UNKNOWN"; break;
-	case HS_STATE_CHANGE_MONO_ON: ret = "HS_STATE_CHANGE_MONO_ON"; break;
-	case HS_STATE_CHANGE_MONO_OFF: ret = "HS_STATE_CHANGE_MONO_OFF"; break;
-	case HS_STATE_CHANGE_STEREO_ON: ret = "HS_STATE_CHANGE_STEREO_ON"; break;
-	case HS_STATE_CHANGE_STEREO_OFF: ret = "HS_STATE_CHANGE_STEREO_OFF"; break;
-	case HS_STATE_CHANGE_MUTE_ON: ret = "HS_STATE_CHANGE_MUTE_ON"; break;
-	case HS_STATE_CHANGE_MUTE_OFF: ret = "HS_STATE_CHANGE_MUTE_OFF"; break;
-	case HS_STATE_CHANGE_BATTERY_LEVEL: ret = "HS_STATE_CHANGE_BATTERY_LEVEL"; break;
-	case HS_STATE_CHANGE_IN_RANGE: ret = "HS_STATE_CHANGE_IN_RANGE"; break;
-	case HS_STATE_CHANGE_OUT_OF_RANGE: ret = "HS_STATE_CHANGE_OUT_OF_RANGE"; break;
-	case HS_STATE_CHANGE_DOCKED: ret = "HS_STATE_CHANGE_DOCKED"; break;
-	case HS_STATE_CHANGE_UNDOCKED: ret = "HS_STATE_CHANGE_UNDOCKED"; break;
-	case HS_STATE_CHANGE_IN_CONFERENCE: ret = "HS_STATE_CHANGE_IN_CONFERENCE"; break;
-	case HS_STATE_CHANGE_DON: ret = "HS_STATE_CHANGE_DON"; break;
-	case HS_STATE_CHANGE_DOFF: ret = "HS_STATE_CHANGE_DOFF"; break;
-	case HS_STATE_CHANGE_SERIAL_NUMBER: ret = "HS_STATE_CHANGE_SERIAL_NUMBER"; break;
-	case HS_STATE_CHANGE_NEAR: ret = "HS_STATE_CHANGE_NEAR"; break;
-	case HS_STATE_CHANGE_FAR: ret = "HS_STATE_CHANGE_FAR"; break;
-	case HS_STATE_CHANGE_DOCKED_CHARGING: ret = "HS_STATE_CHANGE_DOCKED_CHARGING"; break;
-	case HS_STATE_CHANGE_PROXIMITY_UNKNOWN: ret = "HS_STATE_CHANGE_PROXIMITY_UNKNOWN"; break;
-	case HS_STATE_CHANGE_PROXIMITY_ENABLED: ret = "HS_STATE_CHANGE_PROXIMITY_ENABLED"; break;
-	case HS_STATE_CHANGE_PROXIMITY_DISABLED: ret = "HS_STATE_CHANGE_PROXIMITY_DISABLED"; break;
-	case HS_STATE_CHANGE_PRODUCT_NAME: ret = "HS_STATE_CHANGE_PRODUCT_NAME"; break;
-	case HS_STATE_CHANGE_AAL_INCIDENT_REPORT: ret = "HS_STATE_CHANGE_AAL_INCIDENT_REPORT"; break;
-	case HS_STATE_CHANGE_AAL_TWA_REPORT: ret = "HS_STATE_CHANGE_AAL_TWA_REPORT"; break;
-	case HS_STATE_CHANGE_CONVERSATION_DYNAMICS: ret = "HS_STATE_CHANGE_CONVERSATION_DYNAMICS"; break;
-	case HS_STATE_CHANGE_PRODUCTION_NUMBER: ret = "HS_STATE_CHANGE_PRODUCTION_NUMBER"; break;
-	case HS_STATE_CHANGE_PRODUCTION_BUILD: ret = "HS_STATE_CHANGE_PRODUCTION_BUILD"; break;
-	case HS_STATE_CHANGE_PRODUCTION_PART_NUMBER: ret = "HS_STATE_CHANGE_PRODUCTION_PART_NUMBER"; break;
-	case HS_STATE_CHANGE_CONNECTED: ret = "HS_STATE_CHANGE_CONNECTED"; break;
-	case HS_STATE_CHANGE_DISCONNECTED: ret = "HS_STATE_CHANGE_DISCONNECTED"; break;
-	case HS_STATE_CHANGE_QD_CONNECTED: ret = "HS_STATE_CHANGE_QD_CONNECTED"; break;
-	case HS_STATE_CHANGE_QD_DISCONNECTED: ret = "HS_STATE_CHANGE_QD_DISCONNECTED"; break;
-	}
-	return ret;
-}
-
+	
 void PrintDeviceDetails(IDevice* device)
 {
 	bool muted;
@@ -157,7 +112,7 @@ void PrintDeviceDetails(IDevice* device)
 
 	return;
 }
-
+	
 // Call Object
 class Call : public ICall
 {
@@ -277,76 +232,6 @@ public:
 	virtual bool OnCallRequest(CallRequestEventArgs const& pcscArgs) { cout << "OnCallRequest Session event" << endl; return true; }
 	void operator delete(void *p) { ::operator delete(p); }
 };
-
-// create sink for receiving device listener events
-class DeviceListenerEventSink : public IDeviceListenerCallback
-{
-public:
-	DeviceListenerEventSink() { cout << "DeviceListenerEventSink constructor" << endl; }
-	// IDeviceListenerCallback implementations
-	virtual void onHeadsetButtonPressed(DeviceListenerEventArgs const &args) { cout << "onHeadsetButtonPressed Device Listener event" << endl; }
-	virtual void onHeadsetStateChanged(DeviceListenerEventArgs const &args)
-	{
-		std::string state = EnumToString(args.headsetStateChange);
-		cout << "onHeadsetStateChanged Device Listener event: " << state << endl;
-	}
-	virtual void onBaseButtonPressed(DeviceListenerEventArgs const &args) { cout << "onBaseButtonPressed Device Listener event" << endl; }
-	virtual void onBaseStateChanged(DeviceListenerEventArgs const &args) { cout << "onBaseStateChanged Device Listener event" << endl; }
-	virtual void onATDStateChanged(DeviceListenerEventArgs const &args) { cout << "onATDStateChanged Device Listener event" << endl; }
-};
-
-// global variable
-DeviceListenerEventSink* deviceListenerCallback = nullptr;
-
-// function to attach device listener events callback to attached headset (if any)
-void AttachDeviceListener()
-{
-	if (SM_RESULT_SUCCESS != session->getActiveDevice(&activeDevice))
-	{
-		cout << "there is no active devices, please attach one then run the app again" << endl;
-		activeDevice = nullptr;
-	}
-	else
-	{
-		// Get device listener
-		pDeviceListener dev_listener = nullptr;
-
-		auto dm_result = activeDevice->getDeviceListener(&dev_listener);
-
-		if (dm_result != DM_RESULT_SUCCESS)
-		{
-			cout << "failed to get device listener interface" << endl;
-		}
-		else
-		{
-			// Register device listener callbacks
-			deviceListenerCallback = new DeviceListenerEventSink();
-			dm_result = dev_listener->registerCallback(deviceListenerCallback);
-
-			if (dm_result != DM_RESULT_SUCCESS)
-			{
-				cout << "failed to register device listener callback" << endl;
-			}
-		}
-	}
-}
-
-// function to remove device listener events callback
-void RemoveDeviceListener()
-{
-	// Cleanup
-	if (activeDevice != nullptr)
-	{
-		pDeviceListener dev_listener = nullptr;
-		auto dm_result = activeDevice->getDeviceListener(&dev_listener);
-		if (dm_result == DM_RESULT_SUCCESS && deviceListenerCallback != nullptr)
-		{
-			dev_listener->unregisterCallback(deviceListenerCallback);
-			delete deviceListenerCallback;
-		}
-	}
-}
-
 // create sink for receiving session manager events
 class SessionManagerEventSink : public ISessionManagerEvents
 {
@@ -361,7 +246,7 @@ public:
 		int32_t callId = call.getID();
 		std::string state = EnumToString(cseArgs.callState);
 		std::cout << "Call State Changed:  callid=" << callId << " new state=" << state.c_str() << endl;
-
+			
 		return true;
 	}
 	virtual bool OnDeviceStateChanged(DeviceStateEventArgs const& devArgs)
@@ -369,9 +254,6 @@ public:
 		eDeviceState devState = devArgs.deviceState;
 		std::string state = EnumToString(devState);
 		cout << "OnDeviceStateChanged: " << state.c_str() << endl;
-
-		// Remove device listener
-		RemoveDeviceListener();
 
 		gGotDevice = false; // schedule a device re-attach attempt next time around the main menu loop
 
@@ -413,18 +295,18 @@ int _tmain(int argc, _TCHAR* argv[])
 	InitSpokesRuntime();
 
 	cout << "C++ Plantronics Native API Sample" << std::endl;
-
+		
 	// create session manager
 	ISessionManager *sessionManager = nullptr;
 	if (SM_RESULT_SUCCESS == getSessionManager(&sessionManager))
 	{
 		// create session
-		session = nullptr;
+		ISession* session = nullptr;
 		if (SM_RESULT_SUCCESS == sessionManager->registerSession(L"Sample client", &session))
 		{
-			activeDevice = nullptr;
+			IDevice* activeDevice = nullptr;
 			SMResult res = session->getActiveDevice(&activeDevice); // always succeeds (since getActiveDevice() gets a proxy & retruns SM_RESULT_SUCCESS)
-
+				
 			IUserPreference* userPreference = nullptr;
 			if (SM_RESULT_SUCCESS == sessionManager->getUserPreference(&userPreference))
 			{
@@ -441,7 +323,7 @@ int _tmain(int argc, _TCHAR* argv[])
 				// sink to all call events
 				unique_ptr<CallEventSink> callEvents(new CallEventSink(session)); //auto callEvents = std::make_unique<CallEventSink>(session);
 				unique_ptr<SessionManagerEventSink> sessionManagerEvents(new SessionManagerEventSink(sessionManager)); //auto sessionManagerEvents = std::make_unique<SessionManagerEventSink>(sessionManager);
-
+					
 				// enter in command loop
 				while (!quit)
 				{
@@ -451,9 +333,6 @@ int _tmain(int argc, _TCHAR* argv[])
 						std::cout << "Attempting device attach" << std::endl;
 						if (true == activeDevice->isAttached())
 						{
-							// Attach device listener (if device is attached to PC)
-							AttachDeviceListener();
-
 							gGotDevice = true;
 							PrintDeviceDetails(activeDevice);
 						}
@@ -521,10 +400,6 @@ int _tmain(int argc, _TCHAR* argv[])
 				activeDevice->Release();
 			}
 		}
-
-		// Remove device listener
-		RemoveDeviceListener();
-
 		sessionManager->unregisterSession(session);
 		session->Release();
 	}
