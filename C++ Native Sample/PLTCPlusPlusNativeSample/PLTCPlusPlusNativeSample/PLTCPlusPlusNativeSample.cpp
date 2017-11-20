@@ -410,6 +410,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	int cmd = -1;
 	int _callid = 0; // variable to track call id between my app and Plantronics
 
+	InitLogger(".\\Spokes.log4cxx"); // Note: use a local copy of Spokes.log4cxx alongside your EXE to surpress unwanted logging in case Hub is not installed!
 	InitSpokesRuntime();
 
 	cout << "C++ Plantronics Native API Sample" << std::endl;
