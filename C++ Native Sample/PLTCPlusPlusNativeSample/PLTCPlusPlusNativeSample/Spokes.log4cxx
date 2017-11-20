@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+  <!-- Output the log message to log file -->
+  <appender name="RollingFileAppender" class="org.apache.log4j.RollingFileAppender">
+    <param name="file" value="con" />
+    <param name="append" value="true" />
+    <param name="rollingStyle" value="Size" />
+    <param name="maxBackupIndex" value="5" />
+    <param name="maxFileSize" value="10MB" />
+    <staticLogFileName value="true" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-5p %d{dd-MMM-yyyy HH:mm:ss,SSS}{UTC} [%t]: %m%n" />
+    </layout>
+  </appender>
+  <root>
+    <priority value="all" />
+    <appender-ref ref="RollingFileAppender"/>
+  </root>
+
+  <!-- Specify the level for some specific categories -->
+  <category name="functionA" >
+    <priority value ="debug" />
+    <appender-ref ref="RollingFileAppender"/>
+  </category>
+
+</log4j:configuration>

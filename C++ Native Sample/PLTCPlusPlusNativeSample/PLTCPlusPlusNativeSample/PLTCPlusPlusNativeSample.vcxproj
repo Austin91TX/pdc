@@ -65,6 +65,12 @@
       <AdditionalDependencies>%(AdditionalDependencies);Spokes.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:/Program Files (x86)/Plantronics/Spokes3G SDK;C:/Program Files/Plantronics/Spokes3G SDK</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)Spokes.log4cxx" "$(TargetDir)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy Spokes.log4cxx to output folder (this file is used to surpress logging when Hub is not installed).</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -86,6 +92,12 @@
       <AdditionalLibraryDirectories>C:/Program Files (x86)/Plantronics/Spokes3G SDK;C:/Program Files/Plantronics/Spokes3G SDK</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies);Spokes.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)Spokes.log4cxx" "$(TargetDir)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy Spokes.log4cxx to output folder (this file is used to surpress logging when Hub is not installed).</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="PLTCPlusPlusNativeSample.cpp" />
