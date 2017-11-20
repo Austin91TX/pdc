@@ -1,5 +1,5 @@
 # Plantronics Amazon Connect Sample Code
-This GitHub repo contains the sample code to illustrate integrating Plantronics with Amazon Connect.
+This folder contains the sample code to illustrate integrating Plantronics with Amazon Connect.
 
 Note: to make this work with YOUR OWN Amazon Connect instance, you need to update the URL in the code where it says: https://your-amazon-connect-domain/ 
 
