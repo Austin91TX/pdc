@@ -3,6 +3,9 @@ This folder contains the sample code to illustrate integrating Plantronics with 
 
 Note: to make this work with YOUR OWN Amazon Connect instance, you need to update the URL in the code where it says: https://your-amazon-connect-domain/ 
 
+https://github.com/plantronics/pdc/tree/master/Amazon%20Connect%20Sample
+This sample code has been tested with the current version of Amazon Connect, and Plantronics will be available to answer developer questions during integration.  In accordance to the developer policy available at http://developer.plantronics.com/node/551/, this code is made available on an as-is basis.
+
 ### Getting Started with Plantronics Amazon Connect integration sample code
 This sample code illustrates how to integrate Plantronics Amazon Connect Contact Control Panel (CCP) with the Plantronics REST API in order to implement headset call control for Amazon Connect.
 #### The 4 files that comprise it are:
