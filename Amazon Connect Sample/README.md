@@ -29,5 +29,6 @@ Here is a screenshot of the sample code in action
 3. Load the solution in your web browser, e.g. visit https://your-domain/Plantronics%20Amazon%20Connect.html
 #### Troubleshooting
 * If your CCP (Contact Control Panel) fails to embed but opens in a seperate Tab, try closing the Tab and reloading the page "https://your-domain/Plantronics%20Amazon%20Connect.html". 
-* If it continues to fail to embed you can try logging into CCP one time within seperate Tab, then closing the Tab and reloading page "https://your-domain/Plantronics%20Amazon%20Connect.html".
+* If it continues to fail to embed you need to login to the normal connect instance CCP first (known issue: https://github.com/aws/amazon-connect-streams/issues/13) i.e. in a seperate Tab, then close that Tab and reload the embedded version, i.e.: "https://your-domain/Plantronics%20Amazon%20Connect.html".
 * If it still continues to fail to open the browser developer tools / inspect element and open go to the Console, then reload the page "https://your-domain/Plantronics%20Amazon%20Connect.html" and look for errors in the Console.
+* If you see an error in the console like "Refused to display in a frame because it set 'X-Frame-Options' to 'sameorigin'", then please switch from Firefox to Chrome.
