@@ -20394,6 +20394,7 @@ AWS.apiLoader.services['sts']['2011-06-15'] = require('../apis/sts-2011-06-15.mi
       var iframe = document.createElement('iframe');
       iframe.src = params.ccpUrl;
       iframe.style = "width: 100%; height: 100%";
+      iframe.allow = "microphone";
       containerDiv.appendChild(iframe);
 
       // Initialize the event bus and agent data providers.
