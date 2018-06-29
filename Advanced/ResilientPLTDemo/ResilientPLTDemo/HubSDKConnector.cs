@@ -226,21 +226,27 @@ namespace ResilientPLTDemo
                 {
                     COMCallInfo[] calls = _sessionManager.CallManagerState.Calls;
                 }
-                catch (COMException)
+                catch (Exception e)
                 {
-                    attemptReconnect = true;
-                    OnSDKError(new SDKErrorArgs(SDKErrorType.sdk_connection_failed,
-                        "Information: Plantronics COM SDK connection failed. This could be due to PLTHub.exe exitting, or if user quit Plantronics Hub or is in process of upgrading Plantronics Hub. NOTE: re-connect attempts will be made."));
-                    _apiConnected = false;
-                    OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_disconnected, "SDK not connected."));
-                }
-                catch (InvalidComObjectException)
-                {
-                    attemptReconnect = true;
-                    OnSDKError(new SDKErrorArgs(SDKErrorType.sdk_connection_failed,
-                        "Information: Plantronics COM SDK connection failed. This could be due to PLTHub.exe exitting, or if user quit Plantronics Hub or is in process of upgrading Plantronics Hub. NOTE: re-connect attempts will be made."));
-                    _apiConnected = false;
-                    OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_disconnected, "SDK not connected."));
+                    // LC New 29/06/2018 tidy up exception handling
+                    if (e is COMException
+                        || e is InvalidComObjectException
+                        || e is InvalidCastException)
+                    {
+                        attemptReconnect = true;
+                        OnSDKError(new SDKErrorArgs(SDKErrorType.sdk_connection_failed,
+                            "Information: Plantronics COM SDK connection failed. This could be due to PLTHub.exe exitting, or if user quit Plantronics Hub or is in process of upgrading Plantronics Hub. NOTE: re-connect attempts will be made."));
+                        _apiConnected = false;
+                        OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_disconnected, "SDK not connected."));
+                    }
+                    else
+                    {
+                        attemptReconnect = false;
+                        OnSDKError(new SDKErrorArgs(SDKErrorType.sdk_connection_failed,
+                            "Information: Plantronics COM SDK connection failed. Unexpected error, please inform the app developer! NOTE: re-connect attempt will NOT be made."));
+                        _apiConnected = false;
+                        OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_disconnected, "SDK not connected."));
+                    }
                 }
             }
             if (attemptReconnect)
@@ -269,20 +275,30 @@ namespace ResilientPLTDemo
         /// <returns></returns>
         private int GetReconnectDelayTimeMilliseconds()
         {
-            return ProcessRunningStartingWith("PlantronicsHub");
+            return ProcessRunningStartingWith("PlantronicsHub", "Plantronics Hub");
         }
 
-        private int ProcessRunningStartingWith(string filenameprefix)
+        private int ProcessRunningStartingWith(string processNamePrefix, string msiExecWindowTitle)
         {
-            filenameprefix = filenameprefix.ToUpper();
+            processNamePrefix = processNamePrefix.ToUpper();
             bool found = false;
             Process[] processlist = Process.GetProcesses();
             foreach (Process theprocess in processlist)
             {
-                if (theprocess.ProcessName.ToUpper().StartsWith(filenameprefix))
+                if (theprocess.ProcessName.ToUpper().StartsWith(processNamePrefix))
                 {
                     found = true;
                     break;
+                }
+                // New LC 29/06/2018 - also check for Plantronics Hub msiexec processes...
+                if (theprocess.ProcessName.ToUpper().StartsWith("MSIEXEC"))
+                {
+                    if (theprocess.MainWindowTitle.ToUpper().StartsWith(msiExecWindowTitle)
+                        || theprocess.MainWindowTitle.ToUpper().Contains("PLANTRONICS"))
+                    {
+                        found = true;
+                        break;
+                    }
                 }
             }
             return found ? 60000 : 5000;
