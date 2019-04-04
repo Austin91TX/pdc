@@ -21,6 +21,8 @@ namespace ResilientPLTDemo
     /// </summary>
     public class HubSDKConnector
     {
+        public string AppName { get; private set; }
+
         Thread hubSDKThread;
         Queue<HubSDKAction> actionList = new Queue<HubSDKAction>();
         object actionListLock = new object();
@@ -33,6 +35,7 @@ namespace ResilientPLTDemo
         private ICOMSessionManagerEvents_Event _sessionManagerEvents;
         private COMDevice _device;
         private ICOMDeviceListenerEvents_Event _deviceListenerEvents;
+        private ICOMDeviceEvents_Event _deviceComEvents;
         private COMCallCommand _callCommand;
         private COMDeviceListener _deviceListener;
 
@@ -107,9 +110,19 @@ namespace ResilientPLTDemo
             if (HeadsetStateChanged != null)
                 HeadsetStateChanged(e);
         }
-
-        public HubSDKConnector()
+        // pass through delegate for Hub SDK:
+        public delegate void DeviceEventHandler(COMDeviceEventArgs e);
+        public event DeviceEventHandler DeviceEvent;
+        private void OnDeviceEvent(COMDeviceEventArgs e)
         {
+            if (DeviceEvent != null)
+                DeviceEvent(e);
+        }
+
+        public HubSDKConnector(string appName = "My App")
+        {
+            AppName = appName;
+
             hubSDKThread = new Thread(new ThreadStart(HubSDKThreadFunction));
             hubSDKThread.IsBackground = true;
             hubSDKThread.Start();
@@ -192,12 +205,13 @@ namespace ResilientPLTDemo
             {
                 // Connect to the Plantronics COM API
                 _sessionManager = new COMSessionManager();
-                _sessionManager.Register("My App", out _session);
+                _sessionManager.Register(AppName, out _session);
 
                 _sessionManagerEvents = (ICOMSessionManagerEvents_Event) _sessionManager;
                     // obtain session manager events interface
                 _sessionManagerEvents.onDeviceStateChanged += _sessionManagerEvents_onDeviceStateChanged;
-                    // register for device state changed events (device arrival / removal)
+                // register for device state changed events (device arrival / removal)
+                _sessionManagerEvents.onCallStateChanged += _sessionManagerEvents_onCallStateChanged;
 
                 _session.onCallStateChanged += _session_onCallStateChanged;
                     // register for call state changed events (headset call control)
@@ -214,6 +228,13 @@ namespace ResilientPLTDemo
                 OnSDKError(new SDKErrorArgs(SDKErrorType.sdk_connection_failed, e.ToString()));
                 DoAttemptReconnectAfterDelay();
             }
+        }
+
+        private void _sessionManagerEvents_onCallStateChanged(COMCallEventArgs callEventArgs)
+        {
+            // informs us the calling state has changed, for example user as answered/terminated a call
+            // using headset buttons - this event should be used in my app to actually connect/terminate the call!
+            OnCallStateChanged(callEventArgs);
         }
 
         private void DoCheckIfCOMSDKIsActive()
@@ -281,6 +302,7 @@ namespace ResilientPLTDemo
         private int ProcessRunningStartingWith(string processNamePrefix, string msiExecWindowTitle)
         {
             processNamePrefix = processNamePrefix.ToUpper();
+            msiExecWindowTitle = msiExecWindowTitle.ToUpper(); // LC new 8/2/19 this should be toupper'd aswell
             bool found = false;
             Process[] processlist = Process.GetProcesses();
             foreach (Process theprocess in processlist)
@@ -301,7 +323,7 @@ namespace ResilientPLTDemo
                     }
                 }
             }
-            return found ? 60000 : 5000;
+            return found ? 120000 : 5000;
         }
 
         private void DoTidyUpSDK(bool funcCalls = true)
@@ -417,6 +439,7 @@ namespace ResilientPLTDemo
                     if (_deviceListenerEvents != null)
                     {
                         _deviceListenerEvents.onHeadsetStateChanged += _deviceListenerEvents_onHeadsetStateChanged;
+                        _deviceListenerEvents.onATDStateChanged += _deviceListenerEvents_onATDStateChanged;
 
                         OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "Successfully hooked to device listener events"));
                     }
@@ -424,6 +447,19 @@ namespace ResilientPLTDemo
                         OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "Unable to hook to device listener events"));
 
                     _deviceListener = _device.DeviceListener; // Obtain a DeviceListener object for later use
+
+                    _deviceComEvents = _device as ICOMDeviceEvents_Event;
+                    if (_deviceComEvents != null)
+                    {
+                        // Attach to device events
+                        _deviceComEvents.onButtonPressed += _deviceComEvents_onButtonPressed;
+                        _deviceComEvents.onMuteStateChanged += _deviceComEvents_onMuteStateChanged;
+                        _deviceComEvents.onDataReceived += _deviceComEvents_onDataReceived;
+
+                        OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "AttachedEventHandler to device events"));
+                    }
+                    else
+                        OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "Error: unable to attach to device events"));
 
                     OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "Device mute state: muted = " + _deviceListener.mute)); // Obtain initial device microphone mute state
                 }
@@ -434,6 +470,35 @@ namespace ResilientPLTDemo
             {
                 OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "Unable to retrieve/hook to active device"));
             }
+        }
+
+        private static string byteArrayToString(byte[] p)
+        {
+            StringBuilder b = new StringBuilder();
+            foreach (byte x in p)
+                b.Append(x.ToString("X2"));
+            return b.ToString();
+        }
+        private void _deviceComEvents_onDataReceived(ref object report)
+        {
+            byte[] reportbuf = (byte[])report;
+            OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "BR data: " + byteArrayToString(reportbuf)));
+        }
+
+        private void _deviceComEvents_onMuteStateChanged(COMDeviceEventArgs args)
+        {
+            OnDeviceEvent(args);
+        }
+
+        private void _deviceComEvents_onButtonPressed(COMDeviceEventArgs args)
+        {
+            OnDeviceEvent(args);
+        }
+
+        private void _deviceListenerEvents_onATDStateChanged(COMDeviceListenerEventArgs args)
+        {
+            // informs us of a variety of Plantronics device state changes
+            OnHeadsetStateChanged(args);
         }
 
         private void _deviceListenerEvents_onHeadsetStateChanged(COMDeviceListenerEventArgs args)
