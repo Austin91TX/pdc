@@ -163,6 +163,9 @@ namespace ResilientPLTDemo
                         case HubSDKActionType.OutgoingCall:
                             DoOutgoingCall(nextAction.callid, nextAction.contactname);
                             break;
+                        case HubSDKActionType.InsertCall:
+                            DoInsertCall(nextAction.callid, nextAction.contactname);
+                            break;
                         case HubSDKActionType.AnswerCall:
                             DoAnswerCall(nextAction.callid);
                             break;
@@ -185,6 +188,10 @@ namespace ResilientPLTDemo
                         case HubSDKActionType.ConnectToAPI:
                             DoConnectCOMAPI();
                             break;
+                        // advanced options
+                        case HubSDKActionType.DialOutbound:
+                            DoDialOutbound(nextAction.contactname);
+                            break;
                         default:
                             OnSDKError(new SDKErrorArgs(SDKErrorType.sdk_invalid_action_requested, "The action requested is not implemented: "+ nextAction.ActionType));
                             break;
@@ -197,6 +204,12 @@ namespace ResilientPLTDemo
                 // Cleanup the Plantronics COM API
                 DoTidyUpSDK();
             }
+        }
+
+        private void DoDialOutbound(string contactNameOrNumber)
+        {
+            Contact contact = new Contact() { Phone = contactNameOrNumber };
+            _callCommand.MakeCall(contact);
         }
 
         private void DoConnectCOMAPI()
@@ -378,10 +391,23 @@ namespace ResilientPLTDemo
             _callCommand.OutgoingCall(call, contact, CallAudioRoute.AudioRoute_ToHeadset);
         }
 
+        private void DoInsertCall(int callid, string contactname)
+        {
+            COMCall call = new COMCall() { Id = callid };
+            Contact contact = new Contact() { Name = contactname };
+            _callCommand.InsertCall(call, contact);
+        }
+
         private void DoAnswerCall(int callid)
         {
             COMCall call = new COMCall() { Id = callid };
             _callCommand.AnsweredCall(call);
+        }
+
+        private void DoSetAudioRouteHeadset(int callid)
+        {
+            COMCall call = new COMCall() { Id = callid };
+            _callCommand.SetAudioRoute(call, CallAudioRoute.AudioRoute_ToHeadset); // bring up rf link if required
         }
 
         private void DoHoldCall(int callid)
@@ -482,7 +508,8 @@ namespace ResilientPLTDemo
         private void _deviceComEvents_onDataReceived(ref object report)
         {
             byte[] reportbuf = (byte[])report;
-            OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "BR data: " + byteArrayToString(reportbuf)));
+            // uncomment this to see raw data from headset
+            //OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "BR data: " + byteArrayToString(reportbuf)));
         }
 
         private void _deviceComEvents_onMuteStateChanged(COMDeviceEventArgs args)
@@ -606,6 +633,7 @@ namespace ResilientPLTDemo
         None,
         IncomingCall,
         OutgoingCall,
+        InsertCall,
         AnswerCall,
         HoldCall,
         ResumeCall,
@@ -613,6 +641,8 @@ namespace ResilientPLTDemo
         TerminateCall,
         Shutdown,
         CheckCOMAPIActive,
-        ConnectToAPI
+        ConnectToAPI,
+        DialOutbound,
+        AudioOffEndCall
     }
 }

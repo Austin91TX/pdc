@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Interop.Plantronics;
 
 namespace ResilientPLTDemo
@@ -72,6 +73,23 @@ namespace ResilientPLTDemo
                     case "0":
                         quit = true;
                         break;
+                    // ADVANCED OPTIONS
+                    case "9":
+                        // dial outbound call using Hub SDK
+                        Console.Write("Enter phone number >");
+                        string num = Console.ReadLine();
+                        Console.WriteLine("Dialling outbound call to "+num+" with Hub default softphone...");
+                        if (num.Length > 0) _hubSDK.DoHubSDKAction(new HubSDKAction(HubSDKActionType.DialOutbound, 0, num));
+                        else Console.WriteLine("You must enter a contact number or name to dial. Please invoke operation again to retry.");
+                        break;
+                    case "10":
+                        _callid++;
+                        // inform Plantronics my app has an already ongoing call, for instance in auto-answer scenario
+                        Console.WriteLine("Performing insert call, id = " + _callid);
+                        _hubSDK.DoHubSDKAction(new HubSDKAction(HubSDKActionType.InsertCall, _callid, "Bob%20Smith"));
+                        Console.WriteLine("Resuming call, id = " + _callid);
+                        _hubSDK.DoHubSDKAction(new HubSDKAction(HubSDKActionType.ResumeCall, _callid));
+                        break;
                     default:
                         Console.WriteLine("Unrecognised menu choice.");
                         break;
@@ -89,7 +107,7 @@ namespace ResilientPLTDemo
         {
             // informs us the calling state has changed, for example user as answered/terminated a call
             // using headset buttons - this event should be used in my app to actually connect/terminate the call!
-            Console.WriteLine("Call State Changed: callid=" + callEventArgs.call.Id + " new state=" + callEventArgs.CallState);
+            Console.WriteLine("Call State Changed: callid=" + callEventArgs.call.Id + " new state=" + callEventArgs.CallState + " call source = " + callEventArgs.CallSource);
         }
 
         private static void _hubSDK_HeadsetStateChanged(Interop.Plantronics.COMDeviceListenerEventArgs args)
@@ -123,6 +141,10 @@ namespace ResilientPLTDemo
             Console.WriteLine("7 - unmute call");
             Console.WriteLine("8 - end call");
             Console.WriteLine("0 - quit");
+            Console.WriteLine();
+            Console.WriteLine("-- ADVANCED --");
+            Console.WriteLine("9 - dial outbound");
+            Console.WriteLine("10 - insert call");
             Console.WriteLine();
             Console.Write("> ");
         }
