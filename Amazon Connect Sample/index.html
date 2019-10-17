@@ -1,14 +1,14 @@
 ﻿<html>
 <head>
   <meta charset="UTF-8">
-  <title>amznConnect Demo</title>
+  <title>Poly Amazon Connect CCP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
   <link rel="stylesheet" href="css/style.css">
   <!--<script src="js/modernizr.js"></script>-->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-  <script src="js/spokes.js"></script> <!-- Plantronics API interface -->
+  <script src="js/spokes.js"></script> <!-- Poly API interface -->
   <script src="js/util.js"></script>
   <script src="js/amazon-connect-v1.2.0.js"></script>
   <script src="js/scripts.js"></script>
@@ -37,7 +37,7 @@
 			  <thead>
 			    <tr>
 			      <th width="30%">Amazon</th>
-			      <th width="70%">Plantronics</th>
+			      <th width="70%">Poly</th>
 			    </tr>
 			  </thead>
 			  <tbody>
@@ -70,16 +70,17 @@
 		
 		<div id="info-dialog" >
 			<div class="dialog-header">
-				<h4>About this Demo <span class="close-link"><a id="close" href="#">X</a></span></h4>
+				<h4>About<span class="close-link"><a id="close" href="#">X</a></span></h4>
 			</div>
 			<div class="dialog-content">
-				<p>This demo implements Plantronics headset-based call control for Contact Center Agents using Amazon Connect.</p>
+				<p>The Poly Amazon Connect CCP implements Poly headset-based call control for Contact Center Agents using Amazon Connect.</p>
 				<p>Pre-requisites:</p>
 				<ol>
 				    <li>Install Plantronics Hub: <a href="https://www.plantronics.com/software/" target="_new">www.plantronics.com/software</a>. </li>
                     <li>Install Google Chrome: <a href="https://www.google.co.uk/chrome/" target="_new">www.google.co.uk/chrome</a>.</li>
-				    <li>If Amazon CCP (Contact Control Panel) “pops-out” to another Tab, sign in to that Tab then close it, then refresh main app window. </li>
-                    <li>Ready to use Plantronics headset buttons to answer/end/mute/un-mute calls!</li>
+                    <li>Or Firefox: <a href="https://www.mozilla.org/en-GB/firefox/new/" target="_new">www.mozilla.org/en-GB/firefox/new/</a>.</li>
+				    <li>If Amazon CCP (Contact Control Panel) “pops-out” to another Tab, sign in to that Tab then close it, then refresh main app window.</li>
+                    <li>Ready to use Poly headset buttons to answer/end/mute/un-mute calls!</li>
 				</ol>
 			</div>
 		</div>
@@ -90,7 +91,7 @@
 			<img src="images/computer.svg">
 		</div>
 		<div class="message">
-			<h4>Minimum resolution of 1024x768 required.<br/>
+			<h4>Minimum resolution of 690x670 required.<br/>
 				Please expand your browser window.
 			</h4>
 		</div>
@@ -102,7 +103,7 @@
             var inbound = false;
             var spokes; // global Spokes object, initialised when this page is loaded (onload)
             var plugin_registered = false;
-            var plugin_name = "Plantronics Amazon Connect ";
+            var plugin_name = "Poly Amazon Connect";
             var callid = 99;
             var deviceAttached = true;
             var pollRate = 2000;
@@ -113,9 +114,9 @@
             var callMute = 0; // 0 = mute not possible, 1 = not muted, 2 = muted
 
             connect.core.initCCP(containerDiv, {
-                ccpUrl: "https://plt-oda.awsapps.com/connect/ccp#/",
+                ccpUrl: "https://plt-oda.awsapps.com/connect/ccp#",
                 loginPopup: true,
-                softphone: { allowFramedSoftphone: true }
+                softphone: { allowFramedSoftphone: true, loginPopupAutoClose: true }
             });
             connect.agent(function (agent) {
                 appendAmazonLog("contact.agent, Agent name = " + agent.getName() + ", state = " + agent.getState().type);
@@ -332,7 +333,7 @@
                             // attach to the device, provide a callback function for the result
                             spokes.Device.attach(result.Result /*[0]*/.Uid, deviceAttachedCallback);
                         } else {
-                            appendLog("Error: Device was null on connecting to Spokes. Is there a Plantronics device connected?");
+                            appendLog("Error: Device was null on connecting to Spokes. Is there a Poly device connected?");
                             deviceAttached = false;
                         }
                         pollRate = 2000; // waiting for device events now, force faster polling rate to start now (if applicable)
@@ -343,7 +344,7 @@
                         }
                     } else {
                         if (result.Err.Description === "There are no supported devices") {
-                            appendLog("Please attach a Plantronics headset to the PC.");
+                            appendLog("Please attach a Poly headset to the PC.");
                         }
                         else {
                             appendLog("Error connecting to Plantronics Hub. (Have you installed and run Plantronics Hub from <a href=\"http://www.plantronics.com/software\" target=\"_new\">www.plantronics.com/software</a>, or " +

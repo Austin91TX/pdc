@@ -10,6 +10,8 @@ body, html {
   height: 100%;
   width: 100%;
   position: relative;
+  min-width:690px;
+  min-height:670px;  
 }
 #container_mobile {
 	display: none;
@@ -272,7 +274,8 @@ table .highlight2 {
 	text-decoration: underline;
 }
 /*  - - - show/hide minimum screen messaging - -  */
-@media (max-width: 1023px) {
+/* feature disabled 
+@media (max-width: 689px), (max-height: 669px) {
 body, html {
 	background-color: #666;
 }
@@ -315,4 +318,4 @@ body, html {
     box-shadow: 0 6px 20px 0 #222;
 }
 
-}
+} */
