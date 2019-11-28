@@ -49,4 +49,4 @@ The Amazon Connect Instance Alias e.g. myamazonconnect, is needed for the Poly A
 * If your CCP (Contact Control Panel) fails to embed but opens in a seperate Tab, try closing the Tab and reloading the page "https://your-domain/index.html". 
 * If it continues to fail to embed you need to login to the normal connect instance CCP first (known issue: https://github.com/aws/amazon-connect-streams/issues/13) i.e. in a seperate Tab, then close that Tab and reload the embedded version, i.e.: "https://your-domain/index.html".
 * If it still continues to fail to open the browser developer tools / inspect element and open go to the Console, then reload the page "https://your-domain/index.html" and look for errors in the Console.
-* If you see an error in the console like "Refused to display in a frame because it set 'X-Frame-Options' to 'sameorigin'", then please switch from Firefox to Chrome.
+* If you see an error in the console like "Refused to display in a frame because it set 'X-Frame-Options' to 'sameorigin'", then ensure you have whitelisted your domain in step 1.
