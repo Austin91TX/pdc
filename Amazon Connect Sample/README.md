@@ -1,7 +1,8 @@
 # Plantronics Amazon Connect Sample Code
 This folder contains the sample code to illustrate integrating Plantronics with Amazon Connect.
 
-Note: to make this work with YOUR OWN Amazon Connect instance, you need to update the URL in the code where it says: https://your-amazon-connect-domain/ 
+Note: to make this work with YOUR OWN Amazon Connect instance, you need to update the URL in the code where it says: https://myamazonconnect.awsapps.com/connect/ccp#
+The Amazon Connect Instance Alias e.g. myamazonconnect, is needed for the Poly Amazon Connect CCP to connect to your Amazon Connect instance. You can check the name of your instance alias in your AWS Console > Amazon Connect in the list of instances.
 
 This sample code has been tested with the current version of Amazon Connect, and Plantronics will be available to answer developer questions during integration.  In accordance to the developer policy available at http://developer.plantronics.com/node/551/, this code is made available on an as-is basis.
 
@@ -41,7 +42,8 @@ Here is another screenshot showing the new compact version of the integration (w
 * Agent Availability (Offline/Available) based on headset QD (Quick Disconnect) connector (note, the defined agent states must be Offline/Available - currently hard-coded in this sample code
 #### Steps needed to run this sample code:
 1. You need to host your copy of these files on your own secure web server (https) on the Internet, e.g. https://your-domain/index.html, and have https://your-domain whitelisted in your Amazon Connect instance, in order to allow the page to embed your CCP (Contact Control Panel). For more info see the “Getting Started, Whitelisting” section of: https://github.com/aws/amazon-connect-streams/blob/master/Documentation.md 
-2. In the file "Plantronics Amazon Connect.html" you need to change the **ccpUrl** value to your own Amazon Connect instance (for example https://your-amazon-connect-domain/connect/ccp#/ Note: the Amazon Connect domain will be the same as the domain in the URL you use to administrate your Amazon Connect instance.
+2. In the file "index.html" you need to change the **ccpUrl** value to your own Amazon Connect instance (for example https://myamazonconnect.awsapps.com/connect/ccp# 
+The Amazon Connect Instance Alias e.g. myamazonconnect, is needed for the Poly Amazon Connect CCP to connect to your Amazon Connect instance. You can check the name of your instance alias in your AWS Console > Amazon Connect in the list of instances.
 3. Load the solution in your web browser, e.g. visit https://your-domain/index.html
 #### Troubleshooting
 * If your CCP (Contact Control Panel) fails to embed but opens in a seperate Tab, try closing the Tab and reloading the page "https://your-domain/index.html". 
