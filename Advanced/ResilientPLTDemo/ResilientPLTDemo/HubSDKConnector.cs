@@ -102,6 +102,20 @@ namespace ResilientPLTDemo
             if (CallStateChanged != null)
                 CallStateChanged(e);
         }
+        // pass through delegate for Hub SDK(python version):
+        public delegate void CallStateChangedHandlerPy(int callId,
+            int callState,
+            string callStateStr,
+            string callSource);
+        public event CallStateChangedHandlerPy CallStateChangedPy;
+        private void OnCallStateChangedPy(int callId,
+            int callState,
+            string callStateStr,
+            string callSource)
+        {
+            if (CallStateChangedPy != null)
+                CallStateChangedPy(callId, callState, callStateStr, callSource);
+        }
         // pass through delegate for Hub SDK:
         public delegate void HeadsetStateChangedHandler(COMDeviceListenerEventArgs e);
         public event HeadsetStateChangedHandler HeadsetStateChanged;
@@ -109,6 +123,17 @@ namespace ResilientPLTDemo
         {
             if (HeadsetStateChanged != null)
                 HeadsetStateChanged(e);
+        }
+        // pass through delegate for Hub SDK(python version):
+        public delegate void HeadsetStateChangedHandlerPy(int deviceEventType,
+            string deviceEventTypeStr, int headsetStateChange, string headsetStateChangeStr);
+        public event HeadsetStateChangedHandlerPy HeadsetStateChangedPy;
+        private void OnHeadsetStateChangedPy(int deviceEventType,
+            string deviceEventTypeStr, int headsetStateChange, string headsetStateChangeStr)
+        {
+            if (HeadsetStateChangedPy != null)
+                HeadsetStateChangedPy(deviceEventType, deviceEventTypeStr, headsetStateChange,
+                    headsetStateChangeStr);
         }
         // pass through delegate for Hub SDK:
         public delegate void DeviceEventHandler(COMDeviceEventArgs e);
@@ -248,6 +273,10 @@ namespace ResilientPLTDemo
             // informs us the calling state has changed, for example user as answered/terminated a call
             // using headset buttons - this event should be used in my app to actually connect/terminate the call!
             OnCallStateChanged(callEventArgs);
+            OnCallStateChangedPy(callEventArgs.call.Id,
+                (int)callEventArgs.CallState,
+                callEventArgs.CallState.ToString(),
+                callEventArgs.CallSource);
         }
 
         private void DoCheckIfCOMSDKIsActive()
@@ -526,12 +555,18 @@ namespace ResilientPLTDemo
         {
             // informs us of a variety of Plantronics device state changes
             OnHeadsetStateChanged(args);
+            OnHeadsetStateChangedPy(
+                (int)args.DeviceEventType, args.DeviceEventType.ToString(),
+                (int)args.HeadsetStateChange, args.HeadsetStateChange.ToString());
         }
 
         private void _deviceListenerEvents_onHeadsetStateChanged(COMDeviceListenerEventArgs args)
         {
             // informs us of a variety of Plantronics device state changes
             OnHeadsetStateChanged(args);
+            OnHeadsetStateChangedPy(
+                (int)args.DeviceEventType, args.DeviceEventType.ToString(),
+                (int)args.HeadsetStateChange, args.HeadsetStateChange.ToString());
         }
 
         private void DetachDevice()
