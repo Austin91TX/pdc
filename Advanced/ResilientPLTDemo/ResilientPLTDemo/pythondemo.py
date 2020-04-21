@@ -57,10 +57,6 @@ import clr
 import time
 clr.AddReference('System.Collections')
 hubsdkconnector = clr.AddReference("ResilientPLTDemo")
-#may no longer be needed
-#hubsdklib = clr.AddReference('C:\Program Files (x86)\Plantronics\Spokes3G SDK\Interop.Plantronics.dll')
-#from Interop.Plantronics import *
-#print (hubsdklib.FullName)
 
 from System import String, Int32
 from System.Collections.Generic import List
@@ -105,7 +101,7 @@ hubsdk.HeadsetStateChangedPy += _hubSDK_HeadsetStateChangedPy
 # 2. Wait for enter
 input("Press Enter to quit...\r\n\r\n")
 
-time.sleep(1)	 #wait for 1 second, *warning* without this Hub will crash!
+#time.sleep(1)	 #wait for 1 second, *warning* without this Hub will crash!
 
 # 3. Shutdown Hub SDK
 hubsdk.SDKError -= _hubSDK_SDKError
