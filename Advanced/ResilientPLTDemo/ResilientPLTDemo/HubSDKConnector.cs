@@ -537,6 +537,20 @@ namespace ResilientPLTDemo
         private void _deviceComEvents_onDataReceived(ref object report)
         {
             byte[] reportbuf = (byte[])report;
+            // illustration of receiving/surfacing audio status events:
+            string reportstr = byteArrayToString(reportbuf);
+            if (System.Text.RegularExpressions.Regex.IsMatch(reportstr, "0E1E(01|02|03|04|06|09)", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+            {
+                OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "monoon"));
+            }
+            if (System.Text.RegularExpressions.Regex.IsMatch(reportstr, "0E1E(05|07|08|0A|0B)", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+            {
+                OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "mediaon"));
+            }
+            else if (reportstr.Contains("0E1E00"))
+            {
+                OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "monooff / mediaoff"));
+            }
             // uncomment this to see raw data from headset
             //OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "BR data: " + byteArrayToString(reportbuf)));
         }
