@@ -11,11 +11,16 @@
 // For more information see: http://developer.plantronics.com/api-overview#second
 #pragma once
 
+#if (_MSC_VER >= 1915)
+#define no_init_all deprecated
+#endif
+
 #include <windows.h>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <iomanip>
+#include <regex>
 #include <stdio.h>
 #include <tchar.h>
 #include <SDKDDKVer.h>
@@ -128,6 +133,53 @@ std::string EnumToString(eHeadsetStateChange val)
 	case HS_STATE_CHANGE_QD_DISCONNECTED: ret = "HS_STATE_CHANGE_QD_DISCONNECTED"; break;
 	}
 	return ret;
+}
+
+std::string EnumToString(eHeadsetButton val)
+{
+	std::string str;
+	switch (val)
+	{
+		case HEADSET_BUTTON_UNKNOWN: str = "HEADSET_BUTTON_UNKNOWN"; break;
+		case HEADSET_BUTTON_VOLUME_UP: str = "HEADSET_BUTTON_VOLUME_UP"; break;
+		case HEADSET_BUTTON_VOLUME_DOWN: str = "HEADSET_BUTTON_VOLUME_DOWN"; break;
+		case HEADSET_BUTTON_VOLUME_UP_HELD: str = "HEADSET_BUTTON_VOLUME_UP_HELD"; break;
+		case HEADSET_BUTTON_VOLUME_DOWN_HELD: str = "HEADSET_BUTTON_VOLUME_DOWN_HELD"; break;
+		case HEADSET_BUTTON_MUTE: str = "HEADSET_BUTTON_MUTE"; break;
+		case HEADSET_BUTTON_MUTE_HELD: str = "HEADSET_BUTTON_MUTE_HELD"; break;
+		case HEADSET_BUTTON_TALK: str = "HEADSET_BUTTON_TALK"; break;
+		case HEADSET_BUTTON_AUDIO: str = "HEADSET_BUTTON_AUDIO"; break;
+		case HEADSET_BUTTON_PLAY: str = "HEADSET_BUTTON_PLAY"; break;
+		case HEADSET_BUTTON_PAUSE: str = "HEADSET_BUTTON_PAUSE"; break;
+		case HEADSET_BUTTON_NEXT: str = "HEADSET_BUTTON_NEXT"; break;
+		case HEADSET_BUTTON_PREVIOUS: str = "HEADSET_BUTTON_PREVIOUS"; break;
+		case HEADSET_BUTTON_FAST_FORWARD: str = "HEADSET_BUTTON_FAST_FORWARD"; break;
+		case HEADSET_BUTTON_REWIND: str = "HEADSET_BUTTON_REWIND"; break;
+		case HEADSET_BUTTON_STOP: str = "HEADSET_BUTTON_STOP"; break;
+		case HEADSET_BUTTON_FLASH: str = "HEADSET_BUTTON_FLASH"; break;
+		case HEADSET_BUTTON_SMART: str = "HEADSET_BUTTON_SMART"; break;
+
+		//Handset buttons
+		case HEADSET_BUTTON_OFF_HOOK: str = "HEADSET_BUTTON_OFF_HOOK"; break;
+		case HEADSET_BUTTON_ON_HOOK: str = "HEADSET_BUTTON_ON_HOOK"; break;
+		case HEADSET_BUTTON_KEY_0: str = "HEADSET_BUTTON_KEY_0"; break;
+		case HEADSET_BUTTON_KEY_1: str = "HEADSET_BUTTON_KEY_1"; break;
+		case HEADSET_BUTTON_KEY_2: str = "HEADSET_BUTTON_KEY_2"; break;
+		case HEADSET_BUTTON_KEY_3: str = "HEADSET_BUTTON_KEY_3"; break;
+		case HEADSET_BUTTON_KEY_4: str = "HEADSET_BUTTON_KEY_4"; break;
+		case HEADSET_BUTTON_KEY_5: str = "HEADSET_BUTTON_KEY_5"; break;
+		case HEADSET_BUTTON_KEY_6: str = "HEADSET_BUTTON_KEY_6"; break;
+		case HEADSET_BUTTON_KEY_7: str = "HEADSET_BUTTON_KEY_7"; break;
+		case HEADSET_BUTTON_KEY_8: str = "HEADSET_BUTTON_KEY_8"; break;
+		case HEADSET_BUTTON_KEY_9: str = "HEADSET_BUTTON_KEY_9"; break;
+		case HEADSET_BUTTON_KEY_STAR: str = "HEADSET_BUTTON_KEY_STAR"; break;
+		case HEADSET_BUTTON_KEY_POUND: str = "HEADSET_BUTTON_KEY_POUND"; break;
+		case HEADSET_BUTTON_SPEAKER: str = "HEADSET_BUTTON_SPEAKER"; break;
+		case HEADSET_BUTTON_REJECT: str = "HEADSET_BUTTON_REJECT"; break;
+		case HEADSET_BUTTON_REDIAL: str = "HEADSET_BUTTON_REDIAL"; break;
+		default: str = "HEADSET_BUTTON_UNKNOWN";
+	}
+	return str;
 }
 
 void PrintDeviceDetails(IDevice* device)
@@ -284,7 +336,8 @@ class DeviceListenerEventSink : public IDeviceListenerCallback
 public:
 	DeviceListenerEventSink() { cout << "DeviceListenerEventSink constructor" << endl; }
 	// IDeviceListenerCallback implementations
-	virtual void onHeadsetButtonPressed(DeviceListenerEventArgs const &args) { cout << "onHeadsetButtonPressed Device Listener event" << endl; }
+	virtual void onHeadsetButtonPressed(DeviceListenerEventArgs const &args) { cout << "onHeadsetButtonPressed Device Listener event: " + EnumToString(
+		args.headsetButton) << endl; }
 	virtual void onHeadsetStateChanged(DeviceListenerEventArgs const &args)
 	{
 		std::string state = EnumToString(args.headsetStateChange);
@@ -295,8 +348,36 @@ public:
 	virtual void onATDStateChanged(DeviceListenerEventArgs const &args) { cout << "onATDStateChanged Device Listener event" << endl; }
 };
 
+// create sink for receiving data events
+class DeviceEventSink : public IDeviceCallback
+{
+public:
+	virtual void onDataReceived(ReportDataEventArgs const& args) 
+	{ 
+		// illustration of receiving/surfacing audio status events:
+		std::stringstream s;
+		for (int i = 0; i < 16; ++i)
+			s << std::hex << std::setfill('0') << std::setw(2) << (unsigned short)(unsigned char)args.report[i];
+		string reportstr = s.str();
+		// convert string to upper case
+		std::for_each(reportstr.begin(), reportstr.end(), [](char & c) {
+			c = ::toupper(c);
+		});
+		std::regex pattern1(".*0E1E(01|02|03|04|06|09).*", std::regex_constants::icase);
+		std::regex pattern2(".*0E1E(05|07|08|0A|0B).*", std::regex_constants::icase);
+		string pattern3 = "0E1E00";
+		if (std::regex_match(reportstr, std::regex(pattern1)))
+			std::cout << "monoon" << endl;
+		if (std::regex_match(reportstr, std::regex(pattern2)))
+			std::cout << "media on" << endl;
+		if (reportstr.find(pattern3) != string::npos)
+			std::cout << "mono off / media off" << endl;
+	}
+};
+
 // global variable
 DeviceListenerEventSink* deviceListenerCallback = nullptr;
+DeviceEventSink deviceCallback;
 
 // function to attach device listener events callback to attached headset (if any)
 void AttachDeviceListener()
@@ -328,6 +409,16 @@ void AttachDeviceListener()
 				cout << "failed to register device listener callback" << endl;
 			}
 		}
+
+		// Get device sink
+		cout << "Registering for DeviceManager callbacks" << endl;
+
+		DMResult result = activeDevice->registerCallback(&deviceCallback);
+
+		if (result == DM_RESULT_SUCCESS)
+			cout << "Successfully registered for Device callbacks" << endl;
+		else
+			cout << "Failed to register for Device callbacks" << endl;
 	}
 }
 
@@ -344,6 +435,16 @@ void RemoveDeviceListener()
 			dev_listener->unregisterCallback(deviceListenerCallback);
 			delete deviceListenerCallback;
 		}
+
+		// clean device sink
+		cout << "Unregistering for Device callbacks" << endl;
+
+		DMResult result = activeDevice->unregisterCallback(&deviceCallback);
+
+		if (result == DM_RESULT_SUCCESS)
+			cout << "Successfully unregistered for Device callbacks" << endl;
+		else
+			cout << "Failed to unregister for Device callbacks" << endl;
 	}
 }
 
