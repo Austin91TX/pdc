@@ -510,6 +510,7 @@ namespace ResilientPLTDemo
                         _deviceComEvents.onButtonPressed += _deviceComEvents_onButtonPressed;
                         _deviceComEvents.onMuteStateChanged += _deviceComEvents_onMuteStateChanged;
                         _deviceComEvents.onDataReceived += _deviceComEvents_onDataReceived;
+                        _deviceComEvents.onAudioStateChanged += _deviceComEvents_onAudioStateChanged;
 
                         OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "AttachedEventHandler to device events"));
                     }
@@ -527,6 +528,12 @@ namespace ResilientPLTDemo
             }
         }
 
+        private void _deviceComEvents_onAudioStateChanged(COMDeviceEventArgs args)
+        {
+            // uncomment for additional information message
+            //OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "ICOMDeviceEvents_Event.onAudioStateChanged: " + args.AudioState));
+        }
+
         private static string byteArrayToString(byte[] p)
         {
             StringBuilder b = new StringBuilder();
@@ -537,20 +544,22 @@ namespace ResilientPLTDemo
         private void _deviceComEvents_onDataReceived(ref object report)
         {
             byte[] reportbuf = (byte[])report;
-            // illustration of receiving/surfacing audio status events:
-            string reportstr = byteArrayToString(reportbuf);
-            if (System.Text.RegularExpressions.Regex.IsMatch(reportstr, "0E1E(01|02|03|04|06|09)", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
-            {
-                OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "monoon"));
-            }
-            if (System.Text.RegularExpressions.Regex.IsMatch(reportstr, "0E1E(05|07|08|0A|0B)", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
-            {
-                OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "mediaon"));
-            }
-            else if (reportstr.Contains("0E1E00"))
-            {
-                OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "monooff / mediaoff"));
-            }
+
+            // illustration of receiving/surfacing audio status events from data received event, uncomment if required:
+            //string reportstr = byteArrayToString(reportbuf);
+            //if (System.Text.RegularExpressions.Regex.IsMatch(reportstr, "0E1E(01|02|03|04|06|09)", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+            //{
+            //    OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "monoon"));
+            //}
+            //if (System.Text.RegularExpressions.Regex.IsMatch(reportstr, "0E1E(05|07|08|0A|0B)", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+            //{
+            //    OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "mediaon"));
+            //}
+            //else if (reportstr.Contains("0E1E00"))
+            //{
+            //    OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "monooff / mediaoff"));
+            //}
+
             // uncomment this to see raw data from headset
             //OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "BR data: " + byteArrayToString(reportbuf)));
         }
@@ -581,6 +590,9 @@ namespace ResilientPLTDemo
             OnHeadsetStateChangedPy(
                 (int)args.DeviceEventType, args.DeviceEventType.ToString(),
                 (int)args.HeadsetStateChange, args.HeadsetStateChange.ToString());
+
+            // uncomment for additional information message
+            //OnSDKInfo(new SDKInfoArgs(SDKInfoType.sdk_notification, "ICOMDeviceListenerEvents_Event.onHeadsetStateChanged: " + args.HeadsetStateChange));            
         }
 
         private void DetachDevice()
