@@ -1,8 +1,13 @@
 # Plantronics Amazon Connect Sample Code
 This folder contains the sample code to illustrate integrating Plantronics with Amazon Connect.
 
+Important Note about the information below: AWS has changed the ending URL for newly created Amazon Connect instances
+https://docs.aws.amazon.com/connect/latest/adminguide/amazon-connect-release-notes.html#new-domain
+If this applies to you, anywhere you see .awsapps.com/connect/ccp# should be replaced with .my.connect.aws/ccp-v2
+
 Note: to make this work with YOUR OWN Amazon Connect instance, you need to update the URL in the code where it says: https://myamazonconnect.awsapps.com/connect/ccp#
 The Amazon Connect Instance Alias e.g. myamazonconnect, is needed for the Poly Amazon Connect CCP to connect to your Amazon Connect instance. You can check the name of your instance alias in your AWS Console > Amazon Connect in the list of instances.
+
 
 This sample code has been tested with the current version of Amazon Connect, and Plantronics will be available to answer developer questions during integration.  In accordance to the developer policy available at http://developer.plantronics.com/node/551/, this code is made available on an as-is basis.
 
